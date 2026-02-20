@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Meal planner",
-  description: "Meal planner s localStorage, nákupem a týdenním plánem"
+  description: "Meal planner ready for Vercel + Vercel Postgres"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

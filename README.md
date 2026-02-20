@@ -1,28 +1,17 @@
-# Meal Planner (Next.js + localStorage)
+# Meal planner (Vercel-ready)
 
-Kompletně přepsaná verze bez databáze: vše běží v prohlížeči přes `localStorage`, aby deployment na Vercelu fungoval bez další infrastruktury.
+Tato verze je připravená pro deployment na Vercel s fallbackem na čistě client-side režim, pokud free limity Vercel Postgres nestačí.
 
-## Hlavní části aplikace
+## Režimy ukládání
 
-1. **Recepty** (oranžová sekce)
-   - vytvoření receptu,
-   - zadání surovin (sekce, název, množství, jednotka),
-   - recepty jsou draggable do týdenní tabulky.
+- `NEXT_PUBLIC_STORAGE_MODE=postgres` + `DATABASE_URL` → používá Vercel Postgres přes Prisma.
+- `NEXT_PUBLIC_STORAGE_MODE=client` → ukládá recepty jen do `localStorage` (omezená synchronizace mezi zařízeními).
 
-2. **Nákup** (zelená sekce)
-   - automaticky se skládá z receptů z týdenního plánu,
-   - položky jsou seskupené podle sekcí (jako v XLSX),
-   - položky lze odškrtávat.
-
-3. **Týden** (modrá sekce)
-   - tabulka Pondělí–Neděle × Snídaně/Oběd/Večeře,
-   - drag & drop receptů,
-   - mazání přiřazení a reset celého plánu.
-
-## Spuštění
+## Spuštění lokálně
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
@@ -33,6 +22,27 @@ npm run build
 npm run start
 ```
 
-## Poznámka k synchronizaci
+## Prisma migrace pro Vercel
 
-Protože je vše v localStorage, data jsou uložená pouze v konkrétním browseru/zařízení.
+Na produkci používej deploy migrace:
+
+```bash
+npm run prisma:migrate:deploy
+```
+
+## Doporučená konfigurace ve Vercelu
+
+1. Import projektu z Git repa.
+2. Nastav Environment Variables:
+   - `NEXT_PUBLIC_STORAGE_MODE=postgres`
+   - `DATABASE_URL=<Vercel Postgres connection string>`
+3. Build command: `npm run build`
+4. (Volitelně) před deployem spusť `npm run prisma:migrate:deploy` v CI.
+
+## Omezení free Vercel Postgres
+
+Pokud narazíš na limity free tarifu (storage/compute/connections), přepni produkci na:
+
+- `NEXT_PUBLIC_STORAGE_MODE=client`
+
+Aplikace zůstane funkční, ale data budou pouze per-browser/per-device.
