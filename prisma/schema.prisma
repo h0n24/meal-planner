@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+}
+
+model GrocerySection {
+  id         String        @id @default(cuid())
+  name       String
+  sortOrder  Int           @default(0)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  groceryItems GroceryItem[]
+
+  @@unique([name])
+  @@index([sortOrder])
+}
+
+model GroceryItem {
+  id          String             @id @default(cuid())
+  name        String
+  normalizedName String
+  isArchived  Boolean            @default(false)
+  sectionId   String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  section     GrocerySection     @relation(fields: [sectionId], references: [id], onDelete: Restrict)
+  ingredients RecipeIngredient[]
+  checks      ShoppingItemCheck[]
+
+  @@unique([normalizedName])
+  @@index([sectionId])
+}
+
+model Recipe {
+  id           String             @id @default(cuid())
+  name         String
+  description  String?
+  instructions String?
+  imageUrl     String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  ingredients  RecipeIngredient[]
+  weekEntries  WeekPlanEntry[]
+
+  @@index([updatedAt])
+}
+
+model RecipeIngredient {
+  id           String      @id @default(cuid())
+  recipeId     String
+  groceryItemId String
+  amount       Decimal?
+  unit         String?
+  recipe       Recipe      @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  groceryItem  GroceryItem @relation(fields: [groceryItemId], references: [id], onDelete: Restrict)
+
+  @@index([recipeId])
+  @@index([groceryItemId])
+}
+
+model WeekPlan {
+  id            String            @id @default(cuid())
+  weekStartDate DateTime
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  entries       WeekPlanEntry[]
+  checks        ShoppingItemCheck[]
+
+  @@unique([weekStartDate])
+}
+
+model WeekPlanEntry {
+  id         String    @id @default(cuid())
+  weekPlanId String
+  date       DateTime
+  mealType   MealType
+  recipeId   String
+  weekPlan   WeekPlan  @relation(fields: [weekPlanId], references: [id], onDelete: Cascade)
+  recipe     Recipe    @relation(fields: [recipeId], references: [id], onDelete: Restrict)
+
+  @@unique([weekPlanId, date, mealType])
+  @@index([weekPlanId])
+  @@index([recipeId])
+}
+
+model ShoppingItemCheck {
+  id           String      @id @default(cuid())
+  weekPlanId   String
+  groceryItemId String
+  unit         String?
+  isChecked    Boolean     @default(false)
+  checkedAt    DateTime?
+  weekPlan     WeekPlan    @relation(fields: [weekPlanId], references: [id], onDelete: Cascade)
+  groceryItem  GroceryItem @relation(fields: [groceryItemId], references: [id], onDelete: Cascade)
+
+  @@unique([weekPlanId, groceryItemId, unit])
+  @@index([weekPlanId])
+}
