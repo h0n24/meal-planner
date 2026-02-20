@@ -46,3 +46,11 @@ Pokud narazíš na limity free tarifu (storage/compute/connections), přepni pro
 - `NEXT_PUBLIC_STORAGE_MODE=client`
 
 Aplikace zůstane funkční, ale data budou pouze per-browser/per-device.
+
+## Původní podklady a dokumentace
+
+Původní zdrojové podklady jsou přesunuty do složky `Docs/`, aby se neztratily:
+
+- `Docs/meal-planner-codex-starter.md`
+- `Docs/Shopping%20list.xlsx`
+- `Docs/meal%20perp.xlsx`
